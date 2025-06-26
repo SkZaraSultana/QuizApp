@@ -1,0 +1,84 @@
+* {
+  font-family: Georgia, serif;
+  box-sizing: border-box;
+  margin: 0 auto;
+}
+
+/* ✅ Peaceful page background */
+body {
+  background: #F5FFFA; /* Mint Cream */
+}
+
+.pageBackground {
+  background-color: #E6E6FA; /* Lavender - optional if used elsewhere */
+  min-height: 100vh;
+  padding: 5% 0;
+}
+
+.heading {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  font-size: 18px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.parent {
+  padding: 5% 5%;
+}
+
+/* ✅ Quiz box */
+.taketest {
+  margin: auto;
+  background: white;
+  border: 2px solid black;
+  border-radius: 10px;
+  width: 40%;
+  padding: 5%;
+  line-height: 22px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.labels {
+  width: 100%;
+  padding: 2.5% 0%;
+  margin: 8px 0;
+  text-align: left;
+}
+
+.inputs {
+  width: 100%;
+  padding: 2.5% 2.5%;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* ✅ Start button */
+.buttons {
+  display: block;
+  margin: 0 auto;
+  background: #4caf50;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.buttons:hover {
+  background: #45a049;
+}
+
+/* ✅ Responsive design */
+@media screen and (max-width: 600px) {
+  .taketest {
+    width: 80%;
+  }
+}

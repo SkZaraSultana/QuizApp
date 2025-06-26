@@ -1,0 +1,24 @@
+.scoreContainer {
+  background-color: #f0fff0; /* Mint cream */
+  margin: 10% auto;
+  width: 50%;
+  padding: 40px;
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.button {
+  background-color: #4caf50;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.button:hover {
+  background-color: #45a049;
+}
