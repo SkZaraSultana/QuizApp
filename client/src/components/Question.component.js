@@ -18,7 +18,7 @@ function Question() {
   };
 
   useEffect(() => {
-    axios.get("/api/test")
+    axios.get("https://zara-quizapp.onrender.com/api/test")  // ✅ Use your deployed backend URL
       .then((res) => {
         const quizData = res.data.results || [];
         if (quizData.length === 0) {
@@ -56,18 +56,18 @@ function Question() {
   };
 
   const submithandler = () => {
-  let score = 0;
-  questions.forEach((q, i) => {
-    if (answers[i] === q.correct_answer) {
-      score++;
-    }
-  });
+    let score = 0;
+    questions.forEach((q, i) => {
+      if (answers[i] === q.correct_answer) {
+        score++;
+      }
+    });
 
-  history.push("/score", {
-    score,
-    total: questions.length
-  });
-};
+    history.push("/score", {
+      score,
+      total: questions.length
+    });
+  };
 
   if (loading) return <h2 style={{ textAlign: "center" }}>Loading Questions...</h2>;
   if (questions.length === 0) return <h2 style={{ textAlign: "center" }}>No Questions Found</h2>;
