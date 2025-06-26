@@ -13,7 +13,8 @@ app.use(express.json());
 
 app.use(morgan("tiny"));
 
-const uri = process.env.ATLAS_URI;
+const uri = process.env.MONGO_URI;
+
 mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
