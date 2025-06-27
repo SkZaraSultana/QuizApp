@@ -4,115 +4,182 @@ import TestNav from "./TestNav.component";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
 
-function Question() {
-  const history = useHistory();
-  const [questions, setQuestions] = useState([]);
-  const [quesIndex, setQuesIndex] = useState(0);
-  const [options, setOptions] = useState([]);
-  const [answers, setAnswers] = useState({});
-  const [loading, setLoading] = useState(true);
+function Question(props) {
+  let history = useHistory();
 
-  const shuffleArray = (array) => {
-    if (!Array.isArray(array)) return [];
-    return [...array].sort(() => Math.random() - 0.5);
+  const res = props.location.state.res;
+  const mins = res.time.split(":")[0];
+  const secs = (res.time.split(":")[1])? res.time.split(":")[1] : 0 ;
+  const length = res.results.length;
+  const [ques, setques] = useState(0);
+  const [options, setoptions] = useState([]);
+  const [question, setquestion] = useState("");
+  const [answers, setanswers] = useState({});
+
+  const submithandler = () => {
+    let name = localStorage.getItem("name");
+    let email = localStorage.getItem("email");
+    let pin = localStorage.getItem("pin");
+
+    let score = 0;
+    for (let i = 0; i < length; i++) {
+      if (answers[i] == res.results[i].correct_answer) {
+        score += 1;
+      }
+    }
+    score = (score / length) * 100;
+    const options = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    axios
+      .post(
+        "/api/test/submittest",
+        {
+          pin,
+          email,
+          name,
+          score,
+        },
+        options
+      )
+      .then((res) => {
+        console.log(res);
+        history.push("/");
+      })
+      .catch((err) => console.log(err));
+    console.log(score);
   };
 
+  function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+      // Generate random number
+      var j = Math.floor(Math.random() * (i + 1));
+
+      var temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+    }
+
+    return array;
+  }
+
   useEffect(() => {
-    axios.get("/api/test")
-      .then((res) => {
-        const quizData = res.data.results || [];
-        if (quizData.length === 0) {
-          setLoading(false);
-          return;
-        }
-        setQuestions(quizData);
-        const first = quizData[0];
-        const firstOptions = shuffleArray([
-          first.correct_answer,
-          ...first.incorrect_answers
-        ]);
-        setOptions(firstOptions);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching questions:", err);
-        setLoading(false);
-      });
+    for (let i = 0; i < length; i++) {
+      res.results[i].question = res.results[i].question.replace(
+        /&#?\w+;/g,
+        (match) => entities[match]
+      );
+      res.results[i].correct_answer = res.results[i].correct_answer.replace(
+        /&#?\w+;/g,
+        (match) => entities[match]
+      );
+      res.results[ques].incorrect_answers = res.results[
+        ques
+      ].incorrect_answers.map((x) =>
+        x.replace(/&#?\w+;/g, (match) => entities[match])
+      );
+    }
   }, []);
 
   useEffect(() => {
-    if (questions.length > 0) {
-      const current = questions[quesIndex];
-      const shuffled = shuffleArray([
-        current.correct_answer,
-        ...current.incorrect_answers
-      ]);
-      setOptions(shuffled);
-    }
-  }, [quesIndex, questions]);
+    setquestion(res.results[ques].question);
+    setoptions([
+      res.results[ques].correct_answer,
+      ...res.results[ques].incorrect_answers,
+    ]);
+    shuffleArray(options);
+  }, [ques]);
 
-  const handleOptionSelect = (option) => {
-    setAnswers({ ...answers, [quesIndex]: option });
+  const entities = {
+    "&#039;": "'",
+    "&quot;": '"',
+    "&lt;": "<",
+    "&gt;": ">",
+    "&#39;": "'",
+    "&#34;": "'",
+    "&#034;": '"',
+    "&#60;": "<",
+    "&#060;": "<",
+    "&#62;": ">",
+    "&#062;": ">",
+    "&amp;": "&",
+    "&#38;": "&",
+    "&#038;": "&",
   };
 
-  const submithandler = () => {
-  let score = 0;
-  questions.forEach((q, i) => {
-    if (answers[i] === q.correct_answer) {
-      score++;
+  const changeclass = (e) => {
+    const domele = e.nativeEvent.path;
+    domele.reverse();
+    let ans = "";
+    for (let ele of domele) {
+      if (ele.id === "options") {
+        for (let ans of ele.childNodes) {
+          ans.className = styles.container;
+        }
+      } else if (ele.localName === "div" && ele.id === "") {
+        ele.className = styles.containeractive;
+        ans = ele.childNodes[0].value;
+      }
     }
-  });
-
-  history.push("/score", {
-    score,
-    total: questions.length
-  });
-};
-
-  if (loading) return <h2 style={{ textAlign: "center" }}>Loading Questions...</h2>;
-  if (questions.length === 0) return <h2 style={{ textAlign: "center" }}>No Questions Found</h2>;
+    setanswers({ ...answers, [ques]: ans });
+  };
 
   return (
     <Fragment>
-      <TestNav mins={5} secs={0} submithandler={submithandler} />
+      <TestNav mins={mins} secs={secs} submithandler={submithandler} />
       <div className={styles.qcontainer}>
-        {quesIndex + 1}. {questions[quesIndex].question}
+        {ques + 1}. {question}
       </div>
       <div id="options">
-        {options.map((option, index) => {
-          const isSelected = answers[quesIndex] === option;
-          return (
-            <div
-              key={index}
-              className={isSelected ? styles.containeractive : styles.container}
-              onClick={() => handleOptionSelect(option)}
-            >
-              <input
-                className={styles.radios}
-                type="radio"
-                value={option}
-                checked={isSelected}
-                onChange={() => handleOptionSelect(option)}
-                name="options"
-                id={index.toString()}
-              />
-              <label htmlFor={index.toString()}>
-                {String.fromCharCode(65 + index)}. {option}
-              </label>
-            </div>
-          );
-        })}
+        {options.map((option, index) => (
+          <div key={index} className={styles.container} onClick={changeclass}>
+            <input
+              className={styles.radios}
+              type="radio"
+              value={option}
+              name="options"
+              id={index.toString()}
+            />
+            <label htmlFor={index.toString()}>
+              {String.fromCharCode("A".charCodeAt(0) + index)}. {option}
+            </label>
+          </div>
+        ))}
       </div>
-
-      <div style={{ display: "flex", justifyContent: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <a
-          onClick={() => quesIndex > 0 && setQuesIndex(quesIndex - 1)}
+          onClick={(e) => {
+            if (ques == 0) {
+            } else {
+              setques(ques - 1);
+              let answeropt = e.nativeEvent.path[2].childNodes[2].childNodes;
+              for (let opt of answeropt) {
+                opt.className = styles.container;
+              }
+            }
+          }}
           className={styles.buttons1}
         >
           &#8249;
         </a>
         <a
-          onClick={() => quesIndex < questions.length - 1 && setQuesIndex(quesIndex + 1)}
+          onClick={(e) => {
+            if (ques == length - 1) {
+            } else {
+              setques(ques + 1);
+              let answeropt = e.nativeEvent.path[2].childNodes[2].childNodes;
+              for (let opt of answeropt) {
+                opt.className = styles.container;
+              }
+            }
+          }}
           className={styles.buttons2}
         >
           &#8250;
@@ -123,5 +190,3 @@ function Question() {
 }
 
 export default Question;
-
-

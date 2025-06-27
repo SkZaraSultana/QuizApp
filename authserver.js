@@ -1,7 +1,7 @@
-require('dotenv').config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+require("dotenv").config();
 const path = require("path");
 const morgan = require("morgan");
 
@@ -13,14 +13,17 @@ app.use(express.json());
 
 app.use(morgan("tiny"));
 
-const uri = process.env.MONGO_URI;
-
+const uri = process.env.ATLAS_URI;
 mongoose.connect(uri, {
   useNewUrlParser: true,
+  useCreateIndex: true,
   useUnifiedTopology: true,
-})
-.then(() => console.log("MongoDB connected successfully"))
-.catch(err => console.error("MongoDB connection error:", err));
+});
+
+mongoose.connection.once("open", () => {
+  console.log("connection established successfully");
+});
+
 const userRouter = require("./routes/user");
 const testRouter = require("./routes/test");
 app.use("/api/user", userRouter);
